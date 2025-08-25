@@ -1,26 +1,28 @@
 class Solution {
 public:
-    vector<int> findDiagonalOrder(vector<vector<int>>& matrix) {
-        if (matrix.empty() || matrix[0].empty()) return {};
-
-        int m = matrix.size(), n = matrix[0].size();
-        vector<int> result(m * n);
-        int row = 0, col = 0;
-
-        for (int i = 0; i < m * n; i++) {
-            result[i] = matrix[row][col];
-
-            if ((row + col) % 2 == 0) {
-                if (col == n - 1) row++;
-                else if (row == 0) col++;
-                else { row--; col++; }
+    vector<int> findDiagonalOrder(vector<vector<int>>& mat) {
+        int row = mat.size(), col = mat[0].size();
+        int r, c;
+        vector<int> res;
+        for (int diagonal = 0; diagonal < row + col - 1; diagonal++) {
+            if (diagonal % 2 == 0) {
+                // for upward right traverse
+                r = min(diagonal, row - 1), c = diagonal - r;
+                while (r >= 0 and c < col) {
+                    res.push_back(mat[r][c]);
+                    r--;
+                    c++;
+                }
             } else {
-                if (row == m - 1) col++;
-                else if (col == 0) row++;
-                else { row++; col--; }
+                // for downward left traverse
+                c = min(diagonal, col - 1), r = diagonal - c;
+                while (r < row and c >= 0) {
+                    res.push_back(mat[r][c]);
+                    r++;
+                    c--;
+                }
             }
         }
-
-        return result;
+        return res;
     }
 };
