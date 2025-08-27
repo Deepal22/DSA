@@ -13,5 +13,5 @@ public:
         given->val = temp->val;
         given->next = temp->next;
         delete(temp);
-    }    
+    }
 };
