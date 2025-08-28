@@ -1,31 +1,36 @@
 class Solution {
 public:
     vector<vector<int>> sortMatrix(vector<vector<int>>& grid) {
-        map<int,vector<int>>mpp;
-        int n = grid.size();
+        int n = grid.size(), m = grid[0].size();
+        unordered_map<int, vector<int>> mp;
 
-        for(int i = 0; i < n ;i++){
-            for(int j = 0 ;j < n;j++){
-                mpp[i-j].push_back(grid[i][j]);
+        // Step 1: Collect elements along diagonals (key = i - j)
+        for(int i = 0; i < n; i++) {
+            for(int j = 0; j < m; j++) {
+                int key = i - j;
+                mp[key].push_back(grid[i][j]);
             }
         }
 
-        for(auto &it : mpp){
-            if(it.first < 0){
-                sort(begin(it.second),end(it.second));
-            }
-            else{
-                sort(begin(it.second),end(it.second),greater<int>());
-            }
-        }
-
-        for(int i = n-1;i >=0;i--){
-            for(int j = n-1;j >=0 ;j--){
-                grid[i][j] = mpp[i-j].back();
-                mpp[i-j].pop_back();
+        // Step 2: Sort diagonals
+        for(auto &p : mp) {
+            int key = p.first;
+            if(key < 0) {
+                sort(p.second.begin(), p.second.end()); // ascending
+            } else {
+                sort(p.second.begin(), p.second.end(), greater<int>()); // descending
             }
         }
 
+        // Step 3: Place back into grid
+        unordered_map<int, int> idx; // pointer for each diagonal
+        for(int i = 0; i < n; i++) {
+            for(int j = 0; j < m; j++) {
+                int key = i - j;
+                grid[i][j] = mp[key][idx[key]++];
+            }
+        }
+        
         return grid;
     }
 };
