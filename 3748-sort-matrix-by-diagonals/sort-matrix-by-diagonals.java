@@ -1,30 +1,48 @@
 class Solution {
-    public int[][] sortMatrix(int[][] grid) {
-        int n = grid.length;
-
-        // Sort the bottom-left triangle
-        for (int i = 0; i < n; i++) {
-            int[] temp = new int[n - i];
-            for (int j = i; j < n; j++) {
-                temp[j - i] = grid[j][j - i];
-            }
-            Arrays.sort(temp);
-            for (int j = i; j < n; j++) {
-                grid[j][j - i] = temp[n - j - 1];
-            }
+    public int[][] sortMatrix(int[][] mat) {
+        int rows = mat.length;
+        int cols = mat[0].length;
+        
+        for (int row = 0; row < rows; row++) {
+            sortDiagonal(mat, row, 0, false); // false for non-increasing
         }
 
-        // Sort the top-right triangle
-        for (int i = 1; i < n; i++) {
-            int[] temp = new int[n - i];
-            for (int j = i; j < n; j++) {
-                temp[j - i] = grid[j - i][j];
-            }
-            Arrays.sort(temp);
-            for (int j = i; j < n; j++) {
-                grid[j - i][j] = temp[j - i];
-            }
+        for (int col = 1; col < cols; col++) {
+            sortDiagonal(mat, 0, col, true); // true for non-decreasing
         }
-        return grid;
+
+        return mat;
+    }
+
+    private void sortDiagonal(int[][] mat, int row, int col, boolean increasing) {
+        int rows = mat.length;
+        int cols = mat[0].length;
+        
+        int len = Math.min(rows - row, cols - col);
+        int[] diagonal = new int[len];
+
+        for (int i = 0; i < len; i++) {
+            diagonal[i] = mat[row + i][col + i];
+        }
+
+        Arrays.sort(diagonal);
+
+        if (!increasing) {
+            reverse(diagonal);
+        }
+
+        for (int i = 0; i < len; i++) {
+            mat[row + i][col + i] = diagonal[i];
+        }
+    }
+    private void reverse(int[] arr) {
+        int i = 0, j = arr.length - 1;
+        while (i < j) {
+            int temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
+            i++;
+            j--;
+        }
     }
 }
