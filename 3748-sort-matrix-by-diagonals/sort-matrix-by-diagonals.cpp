@@ -1,22 +1,31 @@
-int diag[10];
 class Solution {
 public:
-    static vector<vector<int>> sortMatrix(vector<vector<int>>& grid) {
-        const int n=grid.size();
-        for(int d=n-2; d>0; d--){
-            for(int i=0; i<n-d; i++)
-                diag[i]=grid[i][i+d];
-            sort(diag, diag+(n-d));
-            for(int i=0; i<n-d; i++)
-                grid[i][i+d]=diag[i];
+    vector<vector<int>> sortMatrix(vector<vector<int>>& grid) {
+        map<int,vector<int>>mpp;
+        int n = grid.size();
+
+        for(int i = 0; i < n ;i++){
+            for(int j = 0 ;j < n;j++){
+                mpp[i-j].push_back(grid[i][j]);
+            }
         }
-        for (int d=0; d<n-1; d++){
-            for(int j=0; j<n-d; j++)
-                diag[j]=grid[j+d][j];
-            sort(diag, diag+(n-d), greater<>());
-            for(int j=0; j<n-d; j++)
-                grid[j+d][j]=diag[j];
+
+        for(auto &it : mpp){
+            if(it.first < 0){
+                sort(begin(it.second),end(it.second));
+            }
+            else{
+                sort(begin(it.second),end(it.second),greater<int>());
+            }
         }
+
+        for(int i = n-1;i >=0;i--){
+            for(int j = n-1;j >=0 ;j--){
+                grid[i][j] = mpp[i-j].back();
+                mpp[i-j].pop_back();
+            }
+        }
+
         return grid;
     }
 };
