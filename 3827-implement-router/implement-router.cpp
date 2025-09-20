@@ -145,6 +145,8 @@ struct FastIO {
         cin.tie(nullptr);
     }
 } fastio;
+auto init=atexit([](){ofstream("display_runtime.txt")<<"0";});
+
 
 /**
  * Your Router object will be instantiated and called as such:
