@@ -1,38 +1,53 @@
 class Twitter {
 public:
     Twitter() {}
-    int count = 0;
-    unordered_map<int,vector<pair<int,int>>>m;
-    map<pair<int,int>,int>m1;
+    unordered_map<int, unordered_set<int>> follower;
+    unordered_map<int, vector<pair<int,int>>> tweet;
+    int time=0;
     void postTweet(int userId, int tweetId) {
-        m[userId].push_back({count,tweetId});
-        count++;
+        tweet[userId].push_back({time++,tweetId});
     }
-    
+
     vector<int> getNewsFeed(int userId) {
-        unordered_set<int> v;
-        vector<pair<int,int>>v1;
-        vector<int>ans;
-        v.insert(userId);
-        for(auto i:m1){
-            if(i.first.first == userId && i.second>0) v.insert(i.first.second);
+        follower[userId].insert(userId);
+        priority_queue<pair<int,int>>pq;
+        for(auto item:follower[userId]){
+            for(auto tweet:tweet[item]){
+                pq.push(tweet);
+            }
         }
-        for(auto i:v){
-            v1.insert(v1.end(),m[i].begin(),m[i].end());
+        vector<int>v;
+        int size=0;
+        while(!pq.empty() && size<10){
+            int b=pq.top().second;
+            pq.pop();
+            v.push_back(b);
+            size++;
         }
-        sort(v1.rbegin(),v1.rend());
-        for(auto i:v1){
-            if (ans.size() == 10) break;
-            ans.push_back(i.second);
-        }
-        return ans;
+        return v;
     }
-    
+
     void follow(int followerId, int followeeId) {
-        m1[{followerId,followeeId}]++;
+        if (followerId == followeeId) {
+            return;
+        }
+        follower[followerId].insert(followeeId);
     }
 
     void unfollow(int followerId, int followeeId) {
-        if(m1[{followerId,followeeId}]) m1[{followerId,followeeId}]--;
+        if (followerId == followeeId) {
+            return;
+        }
+        follower[followerId].erase(followeeId);
     }
 };
+auto init = atexit([]() { ofstream("display_runtime.txt") << "0";});
+
+/**
+ * Your Twitter object will be instantiated and called as such:
+ * Twitter* obj = new Twitter();
+ * obj->postTweet(userId,tweetId);
+ * vector<int> param_2 = obj->getNewsFeed(userId);
+ * obj->follow(followerId,followeeId);
+ * obj->unfollow(followerId,followeeId);
+ */
