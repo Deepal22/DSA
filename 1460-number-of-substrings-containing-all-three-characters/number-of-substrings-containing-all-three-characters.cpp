@@ -1,17 +1,16 @@
 class Solution {
 public:
     int numberOfSubstrings(string s) {
-        int abc[3] = {-1, -1, -1};
-        int count = 0, right = 0;
-        while (right < s.length()) {
-            abc[s[right] - 'a'] = right;
-            int minIndex = INT_MAX;
-            for (int i = 0; i < 3; i++) {
-                minIndex = min(minIndex, abc[i]);
+        int lastSeen[3] = {-1, -1, -1};
+        int cnt = 0;
+
+        for(int i = 0; i < s.size(); i++){
+            lastSeen[s[i] - 'a'] = i;
+
+            if(lastSeen[0] != -1 && lastSeen[1] != -1 && lastSeen[2] != -1){
+                cnt += 1 + min({lastSeen[0], lastSeen[1], lastSeen[2]});
             }
-            count += (minIndex + 1);
-            right++;
         }
-        return count;
+        return cnt;
     }
 };
