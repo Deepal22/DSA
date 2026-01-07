@@ -12,28 +12,32 @@
 // Variant with an extra compute_ans=0 in dfs
 class Solution {
 public:
-    const int mod=1e9+7;
-    long long ans=INT_MIN, total=0;
-    int dfs(TreeNode* root, bool compute_ans=0){
-        if (!root) return 0;
-        int sum=root->val
-            +dfs(root->left, compute_ans)
-            +dfs(root->right, compute_ans);
-        if (compute_ans) ans=max(ans, (total-sum)*sum);
-        return sum;
+long long mod = 1e9 + 7;
+long long total = 0;
+long long ans = 0;
+
+    long long subTreeSum(TreeNode* root) {
+        if(root == NULL)    return 0;
+
+        long long leftSum = subTreeSum(root->left);
+        long long rightSum = subTreeSum(root->right);
+
+        ans = max(ans, (leftSum * (total - leftSum)));
+        ans = max(ans, (rightSum * (total - rightSum)));
+
+        return leftSum + rightSum + root->val;
     }
+
+    void totalSum(TreeNode* root) {
+        if(root == NULL)    return;
+        total += root->val;
+        totalSum(root->left);
+        totalSum(root->right);
+    }
+
     int maxProduct(TreeNode* root) {
-        total=dfs(root);
-        dfs(root, 1);
-        return ans%mod;
+        totalSum(root);
+        subTreeSum(root);
+        return ans % mod;
     }
 };
-
-
-
-auto init = []() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-    cout.tie(nullptr);
-    return 'c';
-}();
