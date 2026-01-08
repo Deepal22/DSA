@@ -1,18 +1,27 @@
 class Solution {
 public:
-    int numSubarraysWithSum(vector<int>& nums, int goal) {
-        return atMost(nums, goal) - atMost(nums, goal-1);
-    }
-    int atMost(vector<int>& nums, int goal){
-        int head, tail = 0, sum = 0, result = 0;
-        for (head = 0; head < nums.size(); head++) {
-            sum += nums[head];
-            while (sum > goal && tail <= head) {
-                sum -= nums[tail];
-                tail++;
+    int atmost(vector<int>& nums, int goal) {
+        if (goal < 0) return 0;
+        int left = 0;
+        int n = nums.size();
+        int k = goal;
+        int ans = 0, sum = 0;
+
+        for (int right = 0; right < n; right++) {
+            sum += nums[right];
+
+            while(sum > k){
+                sum = sum - nums[left];
+                left++;
             }
-            result += head - tail + 1;
+
+            ans += right - left +1;
         }
-        return result;
+        return ans;
+    }
+    
+
+    int numSubarraysWithSum(vector<int>& nums, int goal) {
+        return atmost(nums,goal)-atmost(nums,goal-1);
     }
 };
