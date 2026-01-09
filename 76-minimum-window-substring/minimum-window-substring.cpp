@@ -1,32 +1,38 @@
 class Solution {
 public:
-    string minWindow(string s, string t) {
-        int hash[256] = {0};
-        int l = 0, r = 0; 
-        int minLen = 1e9;
-        int sIndex = -1;
-        int cnt = 0;
-        int n = s.size(), m = t.size();
+    string minWindow(string s, string t) 
+    {
+        if (s.size() == 0) return "";
 
-        for(int i = 0; i < m; i++) hash[t[i]]++;
+        if (s.size() < t.size()) return "";
+
+        int count = t.size();
+        int start = 0;
+        int minStart = -1;
+        int minLen = s.size() +1;
         
-        while(r < n){
-            if(hash[s[r]] > 0) cnt++;
-            hash[s[r]]--;
+        unordered_map<int,int>mp;
+        for (int i = 0; i < t.size(); i++) mp[t[i]]++;
 
-            while(cnt == m){
-                if(r-l+1 < minLen){
-                    minLen = r - l + 1;
-                    sIndex = l;
+        for (int i = 0; i < s.size(); i++)
+        {
+            if(mp[s[i]] -- > 0) count--;
+
+            // cout<<count;
+            while (count == 0)
+            {
+                int len = i - start + 1;
+                // cout << len;
+                if (minLen > len)
+                {
+                    minLen = len;
+                    minStart = start;
                 }
-                hash[s[l]]++;
-                
-                if(hash[s[l]] > 0) cnt--;
 
-                l++;
+                if (++mp[s[start++]] > 0) count ++;
             }
-            r++;
         }
-        return sIndex == -1 ? "" : s.substr(sIndex, minLen);
+
+        return minStart == -1 ? "" : s.substr(minStart, minLen);
     }
 };
