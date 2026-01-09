@@ -1,34 +1,24 @@
 class Solution {
-public:
-    int countAtMostK(vector<int> &arr, int k) {
-        
-        int n = arr.size();
-        unordered_map<int, int> mp;
-        int count = 0;
-        int low = 0;
-        
-        for(int i = 0; i < n; i++){
-            
-            mp[arr[i]]++;
-                
-            while(mp.size() > k){
-                
-                mp[arr[low]]--;
-                if(mp[arr[low]] == 0)
-                    mp.erase(arr[low]);
-                
-                low++;
-            }
-                
-            count += (i - low + 1);
-        }
-        
-        return count;
+ public:
+  int subarraysWithKDistinct(vector<int>& nums, int k) {
+    return subarraysWithAtMostKDistinct(nums, k) -
+           subarraysWithAtMostKDistinct(nums, k - 1);
+  }
+
+ private:
+  int subarraysWithAtMostKDistinct(const vector<int>& nums, int k) {
+    int res = 0;
+    vector<int> count(nums.size() + 1);
+
+    for (int l = 0, r = 0; r < nums.size(); ++r) {
+      if (++count[nums[r]] == 1)
+        --k;
+      while (k == -1)
+        if (--count[nums[l++]] == 0)
+          ++k;
+      res += r - l + 1;  // nums[l..r], nums[l + 1..r], ..., nums[r]
     }
 
-public:
-    int subarraysWithKDistinct(vector<int>& nums, int k) {
-        
-        return countAtMostK(nums, k) - countAtMostK(nums, k - 1);
-    }
+    return res;
+  }
 };
