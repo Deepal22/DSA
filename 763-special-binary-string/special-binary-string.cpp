@@ -1,28 +1,43 @@
+#include <string>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
 class Solution {
 public:
+    /**
+     * РЕКУРСИВНО РАЗБИВАЕМ СТРОКУ НА ЭЛЕМЕНТАРНЫЕ "СПЕЦИАЛЬНЫЕ" ПОДСТРОКИ,
+     * СОРТИРУЕМ ИХ И СОБИРАЕМ ОБРАТНО.
+     */
     string makeLargestSpecial(string s) {
-        int count = 0, i = 0;
-        vector<string> res;
-        
-        for (int j = 0; j < s.length(); j++) {
-            // Track balance: +1 for '1', -1 for '0'
-            count += (s[j] == '1') ? 1 : -1;
+        if (s.empty()) return "";
+
+        vector<string> substrings;
+        int balance = 0;
+        int start = 0;
+
+        for (int i = 0; i < s.length(); ++i) {
+            balance += (s[i] == '1' ? 1 : -1);
             
-            // Found a balanced chunk when count returns to 0
-            if (count == 0) {
-                // Recursively maximize inner part, wrap with 1...0
-                res.push_back('1' + makeLargestSpecial(s.substr(i + 1, j - i - 1)) + '0');
-                i = j + 1; // Move to next potential chunk
+            // ЕСЛИ БАЛАНС НУЛЕВОЙ, МЫ НАШЛИ МИНИМАЛЬНУЮ СПЕЦИАЛЬНУЮ ПОДСТРОКУ
+            if (balance == 0) {
+                // ПОДСТРОКА ВНУТРИ ВНЕШНИХ '1' И '0' ТОЖЕ ДОЛЖНА БЫТЬ ОПТИМИЗИРОВАНА
+                // МЫ УДАЛЯЕМ ПЕРВЫЙ '1' И ПОСЛЕДНИЙ '0', РЕКУРСИВНО ОБРАБАТЫВАЕМ ЦЕНТР
+                substrings.push_back("1" + makeLargestSpecial(s.substr(start + 1, i - start - 1)) + "0");
+                start = i + 1;
             }
         }
-        
-        // Sort chunks in descending order for largest arrangement
-        sort(res.begin(), res.end(), greater<string>());
-        
-        string result;
-        for (const string& str : res) {
-            result += str;
+
+        // СОРТИРУЕМ ВСЕ НАЙДЕННЫЕ ПОДСТРОКИ В ОБРАТНОМ ПОРЯДКЕ (ПО УБЫВАНИЮ)
+        sort(substrings.begin(), substrings.end(), greater<string>());
+
+        // СКЛЕИВАЕМ РЕЗУЛЬТАТ
+        string result = "";
+        for (const string& sub : substrings) {
+            result += sub;
         }
+        
         return result;
     }
 };
