@@ -4,26 +4,23 @@
  * @return {number}
  */
 var countPrimeSetBits = function(left, right) {
-    let count = 0;
-    
-    for (let i = left; i <= right; i++) {
-        let setBits = i.toString(2).split('1').length - 1;  // Count 1's in binary
-        if (isPrime(setBits)) {
-            count++;
+    let ans = 0
+    for(let n = left;n<=right;n++){
+        let c = 0
+        let a = n
+        while(a>0){
+            c += a&1
+            a = a>>1
         }
+        let p = true
+        for(let i=2;i<=c/2;i++){
+            if(c%i===0){
+                p = false
+                break
+            }
+        }
+        // console.log(n,c,p)
+        if(p&& c!==1)ans++
     }
-    
-    return count;
+    return ans
 };
-
-function isPrime(n) {
-    if (n <= 1) {
-        return false;
-    }
-    for (let i = 2; i * i <= n; i++) {
-        if (n % i === 0) {
-            return false;
-        }
-    }
-    return true;
-}
