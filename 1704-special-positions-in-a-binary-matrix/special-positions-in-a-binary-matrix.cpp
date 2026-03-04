@@ -1,40 +1,29 @@
 class Solution {
 public:
-    static vector<int> check1(vector<int>& vect, int sz){
-        vector<int> ans;
-        for(int i=0; i<sz; i++){
-            if (vect[i]==1) ans.push_back(i);
-        }
-        return ans;
-    }
-    static int numSpecial(vector<vector<int>>& mat) {
-        int m=mat.size(), n=mat[0].size(), ans=0;
-        vector<bool> col(n, 0);//already check or not
-        for(int i=0; i<m; i++){
-            auto idx=check1(mat[i], n);
-            int j;
-            if (idx.size()==1 && col[(j=idx[0])]==0){
-                col[j]=1;
-                int count_col1=0;
-                for(int k=0; k<m; k++)
-                    count_col1+=mat[k][j];
-                if (count_col1==1){
-                //    cout<<"("<<i<<","<<j<<")\n";
-                    ans++;
-                }     
-            }
-            else{
-                for(int j: idx)
-                    col[j]=1;
+    int numSpecial(vector<vector<int>>& mat) {
+        int m = mat.size();
+        int n = mat[0].size();
+        vector<int> rowCount(m+1, 0);
+        vector<int> colCount(n+1, 0);
+        // pre compute the count of 1
+        for(int i = 0; i < m; i++){
+            for(int j = 0; j < n; j++){
+                if(mat[i][j] == 1){
+                    rowCount[i] +=1;
+                    colCount[j] +=1;
+                }
             }
         }
-        return ans;
+        // now traversing once again
+        int total = 0;
+        for(int row = 0; row < m; row++){
+            for(int col = 0; col < n; col++){
+                if(mat[row][col] == 1 && rowCount[row] <= 1 && colCount[col] <= 1){
+                    total++;
+                    
+                }
+            }
+        }
+        return total;
     }
 };
-auto init = []()
-{ 
-    ios::sync_with_stdio(0);
-    cin.tie(0);
-    cout.tie(0);
-    return 'c';
-}();
