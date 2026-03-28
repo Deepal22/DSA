@@ -1,45 +1,25 @@
 class Solution {
 public:
-    string findTheString(vector<vector<int>>& lcp) {
-        int n = lcp.size();
-        string word(n, '\0');
-        char current = 'a';
-
-        for (int i = 0; i < n; i++) {
-            if (word[i] == '\0') {
-                if (current > 'z') {
-                    return "";
-                }
-                word[i] = current;
-                for (int j = i + 1; j < n; j++) {
-                    if (lcp[i][j] > 0) {
-                        word[j] = word[i];
-                    }
-                }
-                current++;
+    static string findTheString(vector<vector<int>>& lcp) {
+        const int n=lcp.size();
+        string s(n, 'a'-1);
+        int id=-1;
+        for(int i=0; i<n; i++){
+            if (s[i]>='a') continue;
+            if (++id>=26) return "";
+            for(int j=0; j<n; j++)
+                if(lcp[i][j]) s[j]='a'+id;
+        }
+        for(int i=0; i<n; i++){
+            if (lcp[i][i]!=n-i) return "";// check diagonal
+            for(int j=0; j<i; j++){
+                const int x=lcp[i][j];
+                if (x!=lcp[j][i]) return "";// must be symmetry
+                int y=(i<n-1)?lcp[i+1][j+1]:0;
+                y=(s[i]==s[j])?y+1:0;
+                if (x!=y) return "";
             }
         }
-
-        for (int i = n - 1; i >= 0; i--) {
-            for (int j = n - 1; j >= 0; j--) {
-                if (word[i] != word[j]) {
-                    if (lcp[i][j]) {
-                        return "";
-                    }
-                } else {
-                    if (i == n - 1 || j == n - 1) {
-                        if (lcp[i][j] != 1) {
-                            return "";
-                        }
-                    } else {
-                        if (lcp[i][j] != lcp[i + 1][j + 1] + 1) {
-                            return "";
-                        }
-                    }
-                }
-            }
-        }
-
-        return word;
+        return s;
     }
 };
