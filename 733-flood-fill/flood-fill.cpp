@@ -1,33 +1,31 @@
 class Solution {
 public:
-    vector<pair<int, int>> dir = {{-1, 0}, {1, 0}, {0, 1}, {0, -1}};
+    vector<pair<int, int>> dirs = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
+    vector<vector<int>> floodFill(vector<vector<int>>& image, int sr, int sc, int color) {
+        int originalColor = image[sr][sc];
+        int m = image.size();
+        int n = image[0].size();
 
-    vector<vector<int>> floodFill(vector<vector<int>>& image, int sr, int sc,
-                                  int color) {
-        int n = image.size();
-        int m = image[0].size();
+        if (color == originalColor) {
+            return image;
+        }
 
-        vector<vector<bool>> visited(n, vector<bool>(m, false));
-        int color2replace = image[sr][sc];
+        queue<pair<int, int>> q;
+        q.push({sr, sc});
+        while (q.size() > 0) {
+            auto [row, col] = q.front();
+            q.pop();
 
-        auto dfs = [&](auto&& self, int i, int j) -> void {
-            visited[i][j] = true;
-            image[i][j] = color;
-
-            for (auto& [dx, dy] : dir) {
-                int x = i + dx;
-                int y = j + dy;
-
-                if (x < 0 || x >= n || y < 0 || y >= m ||
-                    image[x][y] != color2replace || visited[x][y]) {
-                    continue;
+            for (auto [dx, dy] : dirs) {
+                int newRow = row + dx;
+                int newCol = col + dy;
+                if (newRow >= 0 && newRow < m && newCol >= 0 && newCol < n && image[newRow][newCol] == originalColor) {
+                    q.push({newRow, newCol});
                 }
-
-                self(self, x, y);
             }
-        };
+            image[row][col] = color;
+        }
 
-        dfs(dfs, sr, sc);
         return image;
     }
 };
