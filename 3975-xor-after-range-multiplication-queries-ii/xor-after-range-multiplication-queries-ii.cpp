@@ -1,62 +1,79 @@
+#include <bits/stdc++.h>
+using namespace std;
+
 class Solution {
-public:
-    const int mod = 1e9 + 7;
-    long long power(long long base, long long exp){
-        long long res = 1;
-        while(exp > 0){
-            if(exp & 1) res = (res * base) % mod;
-            base = (base * base) % mod;
-            exp >>= 1;
+    static constexpr int MOD = 1000000007;
+
+    long long modpow(long long a, long long e) {
+        long long r = 1 % MOD;
+        a %= MOD;
+        while (e > 0) {
+            if (e & 1) r = (r * a) % MOD;
+            a = (a * a) % MOD;
+            e >>= 1;
         }
-        return res;
+        return r;
     }
 
-    long long modInv(long long n){
-        return power(n, mod - 2);
-    }
-
+public:
     int xorAfterQueries(vector<int>& nums, vector<vector<int>>& queries) {
         int n = nums.size();
-        int limit = sqrt(n);
-        
-        // group queries with small k for later processing
-        unordered_map<int, vector<vector<int>>> lightK;
+        int B = std::sqrt(n) + 1;
 
-        for(auto& q : queries){
-            int l = q[0], r = q[1], k = q[2], v = q[3];
-            if(k >= limit){ // large k: apply brute force
-                for(int i = l; i <= r; i += k)
-                    nums[i] = (1LL * nums[i] * v) % mod;
-            } else { // small k: process later
-                lightK[k].push_back(q);
-            } 
-        }
+        vector<vector<vector<pair<int,int>>>> events(B + 1);
+        for (int k = 1; k <= B; ++k)
+            events[k].resize(k);
 
-        for(auto& [k, query] : lightK){
-            // process small queries grouped by step size k
-            vector<long long> diff(n, 1);
-            for(auto& q : query){
-                int l = q[0], r = q[1], v = q[3];
-                // multiply starting position
-                diff[l] = (diff[l] * v) % mod;
-                // cancel the multiplication using modular inverse
-                int steps = (r - l) / k;
-                int next = l + (steps + 1) * k;
-                if(next < n){
-                    diff[next] = (diff[next] * modInv(v)) % mod;
+        for (auto &qq : queries) {
+            int l = qq[0], r = qq[1], k = qq[2], v = qq[3];
+            if (k > B) {
+                for (int idx = l; idx <= r; idx += k)
+                    nums[idx] = (long long)nums[idx] * v % MOD;
+            } else {
+                int res = l % k;
+                int t1 = (l - res) / k;
+                int t2 = (r - res) / k;
+                events[k][res].push_back({t1, v});
+                
+                if (t2 + 1 <= (n - 1 - res) / k) {
+                    int invv = modpow(v, MOD - 2);
+                    events[k][res].push_back({t2 + 1, invv});
                 }
             }
-            
-            // propagate the multipliers with a step size of k
-            for(int i = 0; i < n; i++){
-                if(i >= k) diff[i] = (diff[i] * diff[i-k]) % mod;
-                nums[i] = (1LL * nums[i] * diff[i]) % mod;
+        }
+
+        for (int k = 1; k <= B; ++k)
+        for (int res = 0; res < k; ++res) {
+            auto &ev = events[k][res];
+            if (ev.empty())
+                continue;
+
+            sort(ev.begin(), ev.end());
+            vector<pair<int,int>> comp;
+
+            for (auto &p : ev) {
+                if (!comp.empty() && comp.back().first == p.first)
+                    comp.back().second = (long long)comp.back().second * p.second % MOD;
+                else
+                    comp.push_back(p);
+            }
+
+            long long cur = 1;
+            int ptr = 0;
+            int t = 0;
+            for (int idx = res; idx < n; idx += k, ++t) {
+                while (ptr < comp.size() && comp[ptr].first == t) {
+                    cur = (cur * comp[ptr].second) % MOD;
+                    ++ptr;
+                }
+                nums[idx] = nums[idx] * cur % MOD;
             }
         }
 
-        int ans = 0;
-        for(auto& num : nums) ans ^= num;
+        int xr = 0;
+        for (int x : nums)
+            xr ^= x;
 
-        return ans;    
+        return xr;
     }
 };
