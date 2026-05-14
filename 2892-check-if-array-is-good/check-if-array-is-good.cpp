@@ -1,27 +1,22 @@
 class Solution {
+    static inline int P[201];
+    static inline int vers = 0;
 public:
     bool isGood(vector<int>& nums) {
-        int mx = *max_element(nums.begin(), nums.end());
-
-        // size must be mx + 1
-        if(nums.size() != mx + 1)
-            return false;
-
-        vector<int> freq(mx + 1, 0);
-
-        for(int x : nums) {
-            // invalid number
-            if(x < 1 || x > mx)
+        vers++;
+        int max = nums.size() - 1;
+        for (auto& n : nums) {
+            if (n > max || P[n] == -vers)
                 return false;
-            freq[x]++;
-        }
 
-        // 1 to mx-1 should appear once
-        for(int i = 1; i < mx; i++) {
-            if(freq[i] != 1)
-                return false;
+            if (P[n] == vers) {
+                if (n != max)
+                    return false;
+                P[n] = -vers;
+            } else
+                P[n] = vers;
         }
-        // mx should appear twice
-        return freq[mx] == 2;
+        
+        return true;
     }
 };
