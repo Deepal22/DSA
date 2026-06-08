@@ -1,84 +1,70 @@
 class Solution {
 public:
-    long long totalWaviness(long long num1, long long num2) {
-        using ll = long long;
-        // calculate the sum of the volatility values of all numbers in [0, num]
-        auto solve = [&](ll num) -> ll {
-            // if the fluctuation value of numbers less than 3 is 0
-            if (num < 100) {
-                return 0;
+    using ll = long long;
+    ll ll_pow(ll base, ll power) {
+        ll result = 1;
+        for(int i = 0; i < power; i++) {
+            result *= base;
+        }
+        return result;
+    }
+
+    ll wav(ll num){
+        if(num <= 100) return 0;
+        string s = to_string(num);
+        int n = s.size();
+
+        ll a, b, c, res = 0;
+
+        for(int i=0; i<n-2; i++){
+            a = 1, b = 0, c = 1;
+            ll exp = 1; 
+
+            for(int j=n-1; j>=0; j--){
+                if(j>=i && j<=i+2) continue;
+                if(j<i) a += exp * (s[j]-'0');
+                else a *= 10;
+                exp *= 10;
             }
-            string s = to_string(num);
-            int n = s.size();
+            
+            if(i>0) b = a - ll_pow(10, n-i-3);
 
-            // memoized search uses two independent arrays
-            // memo_cnt[pos][x][y]: the number of valid filling schemes where
-            // the current digit is at position pos, and the previous two digits
-            // are x and y
-            ll memo_cnt[16][10][10];
-            // memo_sum[pos][x][y]: the fluctuation value when the current
-            // position is pos, and the two left digits are x and y
-            ll memo_sum[16][10][10];
-            memset(memo_cnt, -1, sizeof(memo_cnt));
-            memset(memo_sum, -1, sizeof(memo_sum));
+            exp = 1; 
+            for(int j=n-1; j>=0; j--){
+                if(j>=i && j<=i+2) continue;
+                c += exp * (s[j]-'0');
+                exp *= 10;
+            }
 
-            auto dfs = [&](this auto&& dfs, int pos, int prev, int curr,
-                           bool isLimit, bool isLeading) -> pair<ll, ll> {
-                // end position
-                if (pos == n) {
-                    return {1, 0};
-                }
-                // use memoization only when not bounded by an upper limit and
-                // without leading zeros
-                if (!isLimit && !isLeading && prev >= 0 && curr >= 0) {
-                    if (memo_cnt[pos][prev][curr] != -1) {
-                        return {memo_cnt[pos][prev][curr],
-                                memo_sum[pos][prev][curr]};
-                    }
-                }
-
-                // calculate the number of schemes and fluctuation value under
-                // the current conditions
-                ll cnt = 0, sum = 0;
-                int up = isLimit ? s[pos] - '0' : 9;
-                for (int digit = 0; digit <= up; ++digit) {
-                    bool newLeading = isLeading && (digit == 0);
-                    // the previous number is updated to curr
-                    int newPrev = curr;
-                    // the current number is updated to digit
-                    int newCurr = newLeading ? -1 : digit;
-                    auto [subCnt, subSum] =
-                        dfs(pos + 1, newPrev, newCurr, isLimit && (digit == up),
-                            newLeading);
-                    // only calculate the fluctuation value when there are no
-                    // leading zeros
-                    if (!newLeading && prev >= 0 && curr >= 0) {
-                        // when the digit is a peak or a valley, update the
-                        // current fluctuation value
-                        if ((prev < curr && curr > digit) ||
-                            (prev > curr && curr < digit)) {
-                            sum += subCnt;
+            int tar = (s[i]-'0')*100 + (s[i+1]-'0')*10 + s[i+2]-'0';
+            ll sub = ll_pow(10, n - i - 3); 
+            for(int j=0; j<=9; j++){
+                if(i==0 && j==0) continue;
+                for(int k=0; k<=9; k++){
+                    for(int l=0; l<=9; l++){
+                        if((k>j && k>l) || (k<j && k<l)){
+                            int curr = j*100 + k*10 + l;
+                            if(curr < tar){
+                                res += a;
+                                if(curr < 100) res -= sub; 
+                            }
+                            else if(curr == tar){
+                                res += c;
+                                if(curr < 100) res -= sub;
+                            }
+                            else{
+                                res += b;
+                                if(curr < 100) res -= sub; 
+                            }
                         }
                     }
-
-                    cnt += subCnt;
-                    sum += subSum;
                 }
+            }
+        }
 
-                if (!isLimit && !isLeading && prev >= 0 && curr >= 0) {
-                    // update the memoization array
-                    memo_cnt[pos][prev][curr] = cnt;
-                    memo_sum[pos][prev][curr] = sum;
-                }
-
-                return {cnt, sum};
-            };
-
-            // pass dfs as the first parameter
-            auto [_, totalSum] = dfs(0, -1, -1, true, true);
-            return totalSum;
-        };
-
-        return solve(num2) - solve(num1 - 1);
+        return res;
+    }
+    long long totalWaviness(long long num1, long long num2) {
+        return wav(num2) - wav(num1-1);
     }
 };
