@@ -1,60 +1,54 @@
 class Solution {
-    static constexpr int dirs[4][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
-
 public:
-    int maximumSafenessFactor(vector<vector<int>>& A) {
-        if (A[0][0] || A.back().back())
-            return 0;
+    int maximumSafenessFactor(vector<vector<int>>& grid) {
+        ios_base::sync_with_stdio(false);cin.tie(nullptr);cout.tie(nullptr);
+        int n = grid.size();
+        int m = grid[0].size();
+        if(grid[0][0] || grid[n - 1][m - 1])return 0;
 
-        int n = A.size();
-        queue<pair<int, int>> q;
+        vector<vector<int>>dist = vector<vector<int>>(n ,vector<int>(m, 0));
+        vector<vector<int>>vis = vector<vector<int>>(n ,vector<int>(m, 0));
 
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < n; j++)
-                if (A[i][j])
-                    q.push({i, j});
-
-        while (q.size()) {
-            auto [i, j] = q.front();
-            q.pop();
-
-            int v = A[i][j];
-
-            for (auto& d : dirs) {
-                int x = i + d[0];
-                int y = j + d[1];
-
-                if (min(x, y) >= 0 && max(x, y) < n && !A[x][y]) {
-                    A[x][y] = v + 1;
-                    q.push({x, y});
-                }
+        queue<pair<int, int>>pq;
+        for(int i=0;i<n;i++) {
+            for(int j = 0;j < m;j++) {
+                if(grid[i][j] == 1)pq.push({i, j});
+                if(grid[i][j] == 1)vis[i][j] = 1;
             }
         }
-
-
-
-        priority_queue<tuple<int, int, int>> pq;
-
-        pq.push({A[0][0], 0, 0});
-
-        while (pq.size()) {
-            auto [sf, i, j] = pq.top();
-            pq.pop();
-
-            if (i == n - 1 && j == n - 1)
-                return sf - 1;
-
-            for (auto& d : dirs) {
-                int x = i + d[0];
-                int y = j + d[1];
-
-                if (min(x, y) >= 0 && max(x, y) < n && A[x][y] > 0) {
-                    pq.push({min(sf, A[x][y]), x, y});
-                    A[x][y] *= -1;
-                }
+        int dista = 0;
+        while(!pq.empty()) {
+            int s = pq.size();
+            for(int i=0;i<s;i++) {
+                int x = pq.front().first;
+                int y = pq.front().second;
+                dist[x][y] = dista;
+                pq.pop();
+                if(x - 1 >= 0 && grid[x - 1][y] == 0){pq.push({x - 1, y});grid[x - 1][y] = -1;}
+                if(y - 1 >= 0 && grid[x][y - 1] == 0){pq.push({x, y - 1});grid[x][y - 1] = -1;}
+                if(x + 1 < n && grid[x + 1][y] == 0){pq.push({x + 1, y});grid[x + 1][y] = -1;}
+                if(y + 1 < m && grid[x][y + 1] == 0){pq.push({x, y + 1}); grid[x][y + 1] = -1;}
             }
+            dista++;
         }
 
-        return A.back().back() - 1;
+        priority_queue<pair<int, pair<int, int>>>pqq;
+        pqq.push({dist[0][0], {0, 0}});
+        vis[0][0] = true;
+        while(!pqq.empty()) {
+            auto it = pqq.top();
+            pqq.pop();
+            int cost = it.first;
+            int x = it.second.first;
+            int y = it.second.second;
+            // vis[x][y] = true;
+            if(x == n - 1 && y == m - 1)return cost;
+            if(x - 1 >= 0 && vis[x - 1][y] == 0){pqq.push({min(dist[x - 1][y],cost), {x - 1, y}});vis[x - 1][y] = true;}
+            if(y - 1 >= 0 && vis[x][y - 1] == 0){pqq.push({min(dist[x][y - 1], cost), {x, y - 1}});vis[x][y - 1] = true;}
+            if(x + 1 < n && vis[x + 1][y] == 0){pqq.push({min(dist[x + 1][y], cost), {x + 1, y}});vis[x + 1][y] = true;}
+            if(y + 1 < m && vis[x][y + 1] == 0){pqq.push({min(dist[x][y + 1], cost), {x, y + 1}}); vis[x][y + 1] = true;}
+
+        }
+        return 0;
     }
 };
