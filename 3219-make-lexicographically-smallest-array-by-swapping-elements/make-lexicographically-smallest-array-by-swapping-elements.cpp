@@ -1,35 +1,43 @@
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
 class Solution {
 public:
     vector<int> lexicographicallySmallestArray(vector<int>& nums, int limit) {
         int n = nums.size();
-
-        vector<int> sorted = nums;
-        sort(sorted.begin(), sorted.end());
-
-        unordered_map<int, vector<int>> group;
-        unordered_map<int, int> groupId;
-        unordered_map<int, int> pos;
-
-        int id = 1;
-        group[id].push_back(sorted[0]);
-        groupId[sorted[0]] = id;
-
-        for(int i = 1; i < n; i++){
-            if(sorted[i] - sorted[i - 1] > limit){
-                id++;
-            }
-
-            group[id].push_back(sorted[i]);
-            groupId[sorted[i]] = id;
+        vector<pair<int, int>> pairs(n);
+        for (int i = 0; i < n; ++i) {
+            pairs[i] = {nums[i], i};
         }
 
-        // Rebuild nums using the smallest
-        // available value from its group
-        for(int i = 0; i < n; i++){
-            int grp = groupId[nums[i]];
+        // 1. Sort contiguous pairs for optimal cache performance
+        sort(pairs.begin(), pairs.end());
 
-            nums[i] = group[grp][pos[grp]];
-            pos[grp]++;
+        vector<int> group_indices;
+        group_indices.reserve(n);
+
+        // 2. Process each component in contiguous blocks
+        for (int l = 0; l < n; ) {
+            int r = l + 1;
+            while (r < n && pairs[r].first - pairs[r - 1].first <= limit) {
+                ++r;
+            }
+
+            // Collect and sort original indices for component block [l, r)
+            group_indices.clear();
+            for (int i = l; i < r; ++i) {
+                group_indices.push_back(pairs[i].second);
+            }
+            sort(group_indices.begin(), group_indices.end());
+
+            // 3. Write back directly in-place
+            for (int i = 0; i < group_indices.size(); ++i) {
+                nums[group_indices[i]] = pairs[l + i].first;
+            }
+
+            l = r;
         }
 
         return nums;
