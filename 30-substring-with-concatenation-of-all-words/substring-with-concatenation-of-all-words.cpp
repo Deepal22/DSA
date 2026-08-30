@@ -1,38 +1,41 @@
 class Solution {
 public:
-    
-    bool checkSubstring(unordered_map<string, int> wordCount, string s, int wordLen) {
-        for(int j=0; j<s.size(); j+=wordLen) {
-            string w = s.substr(j, wordLen);
-            if(wordCount.find(w) != wordCount.end()) {
-                if(--wordCount[w] == -1) {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        }
-        return true;
-    }
-
     vector<int> findSubstring(string s, vector<string>& words) {
-        vector<int> res;
-        int wordLen = words[0].size();
-        int sLen = s.size();
-        int wordsWindow = words.size() * wordLen;
-        
-        unordered_map<string, int> wordCount;
-        for(int i=0; i<words.size(); i++) {
-            wordCount[words[i]]++;
-        }
-        
-        int i = 0;
-        while(i + wordsWindow <= sLen) {
-            if(checkSubstring(wordCount, s.substr(i, wordsWindow), wordLen)) {
-                res.push_back(i);
+        vector<int> result;
+        const int n = s.size();
+        const int numWords = words.size();
+        const int wordSize = words[0].size();
+        unordered_map<string_view, int> goal;
+        ranges::for_each(words, [&](const string& word) { goal[word]++; });
+        for (int i = 0; i < wordSize; i++) { // O(wordSize * )
+            unordered_map<string_view, int> curr;
+            int wordsFound = 0;
+            int l = i;
+            for (int r = l; r <= n - wordSize; r += wordSize) {
+                string_view word(s.data() + r, wordSize);
+                if (goal.contains(word)) {
+                    curr[word]++;
+                    while (curr[word] > goal[word]) {
+                        string_view lstring(s.data() + l, wordSize);
+                        curr[lstring]--;
+                        l += wordSize;
+                        wordsFound--;
+                    }
+                    wordsFound++;
+                    if (wordsFound == numWords) {
+                        result.push_back(l);
+                        string_view lstring(s.data() + l, wordSize);
+                        curr[lstring]--;
+                        l += wordSize;
+                        wordsFound--;
+                    }
+                } else {
+                    curr.clear();
+                    wordsFound = 0;
+                    l = r + wordSize;
+                }
             }
-            i++;
         }
-        return res;
+        return result;
     }
 };
